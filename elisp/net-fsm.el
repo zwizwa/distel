@@ -47,11 +47,14 @@ addition to being passed as an argument.")
 ;; External API
 ;; ----------------------------------------------------------------------
 
+
+
 (defun fsm-open-socket (host port)
   (let ((buf (generate-new-buffer " *net-fsm*")))
     (fsm-with-error-cleanup (kill-buffer buf)
       (let ((p (open-network-stream "netfsm" buf host port)))
         (set-process-coding-system p 'no-conversion 'no-conversion)
+        (set-process-query-on-exit-flag p nil)
         (when (fboundp 'set-process-filter-multibyte)
           (set-process-filter-multibyte p nil))
         p))))
@@ -265,6 +268,7 @@ buffer."
 (defun fsm-replace-process-buffer (process buffer)
   (let ((oldbuffer (process-buffer process)))
     (set-process-buffer process buffer)
-    (kill-buffer oldbuffer)))
+    (kill-buffer oldbuffer)
+    ))
 
 (provide 'net-fsm)
