@@ -23,6 +23,8 @@
 -export([apropos/2, describe/4, get_arglists/2]).
 -export([xref_callgraph/1, who_calls/3, rebuild_callgraph/0]).
 
+-export([code_modules/1, code_functions/2]).
+
 -include_lib("kernel/include/file.hrl").
 
 -import(lists, [any/2,
@@ -684,15 +686,35 @@ stack_pos(#attach{stack={Pos,_Max}}) -> Pos.
 %% ----------------------------------------------------------------------
 
 modules(Prefix) ->
-  case otp_doc:modules(Prefix) of
-    {ok,Ans} -> {ok,Ans};
-    {error,_}-> xref_modules(Prefix)
-  end.
+    %% log:info("modules()~n"),
+    case otp_doc:modules(Prefix) of
+        {ok,Ans} -> {ok,Ans};
+        {error,_} -> xref_modules(Prefix)
+    end.
 functions(Mod, Prefix) ->
   case otp_doc:functions(Mod,Prefix) of
     {ok,Ans} -> {ok,Ans};
     {error,_}-> xref_functions(Mod,Prefix)
   end.
+
+%% Alternatives, bypassing xref since it doesn't list everything and I
+%% can't figure out why.  See corresponding modification in
+%% erl-service.el
+code_modules(Prefix) ->
+    {ok, filter_prefix(Prefix, [atom_to_list(M) || {M,_Src} <- code:all_loaded()])}.
+code_functions(Mod, Prefix) ->
+    MI = try Mod:module_info(exports) catch _:_ -> [] end,
+    {ok, filter_prefix(Prefix, [atom_to_list(F) || {F,_Nargs} <- MI])}.
+filter_prefix(Prefix, List) ->
+    Re = "^" ++ Prefix,
+    lists:filter(
+      fun(M) -> 
+              case re:run(M, Re) of
+                  {match,_} -> true;
+                  _ -> false
+              end
+      end,
+      List).
 
 xref_completions(F,A) ->
     fun(server) -> distel_completions;
@@ -702,7 +724,9 @@ xref_completions(F,A) ->
     end.
 
 rebuild_completions() ->
-    xref_rebuild(xref_completions("",[])).
+    Opts = xref_completions("",[]),
+    %% log:info("Opts: ~p~n", [Opts]),
+    xref_rebuild(Opts).
 
 %% Returns: [ModName] of all modules starting with Prefix.
 %% ModName = Prefix = string()

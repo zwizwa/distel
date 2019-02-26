@@ -890,6 +890,11 @@ Value is non-nil if search is successful."
 
 ;;;; Completion
 
+;; [tom] This replaced distel:modules/1 and distel:functions/1 with
+;; distel:code_modules/1 and distel:code_functions/2, which do not use
+;; XREF.  The latter misses some references for reasons I cannot
+;; figure out.
+
 (defun erl-complete (node)
   "Complete the module or remote function name at point."
   (interactive (list (erl-target-node)))
@@ -913,13 +918,13 @@ Value is non-nil if search is successful."
                   (pref (match-string 2 str))
                   (beg (+ beg (match-beginning 2))))
               (erl-spawn
-                (erl-send-rpc node 'distel 'functions (list mod pref))
+                (erl-send-rpc node 'distel 'code_functions (list mod pref))
                 (&erl-receive-completions "function" beg end pref buf
                                           continuing
                                           #'erl-complete-sole-function)))
           ;; completing just a module
           (erl-spawn
-            (erl-send-rpc node 'distel 'modules (list str))
+            (erl-send-rpc node 'distel 'code_modules (list str))
             (&erl-receive-completions "module" beg end str buf continuing
                                       #'erl-complete-sole-module)))))))
 
