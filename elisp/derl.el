@@ -220,6 +220,8 @@ gen_digest() function:
   (derl-hexstring-to-binstring
    (md5 (concat (derl-cookie) (derl-int32-to-decimal challenge)))))
 
+(message "dbg: derl.el")
+
 (defun derl-cookie ()
   (or derl-cookie
       (and derl-node-to-cookie
