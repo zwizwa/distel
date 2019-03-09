@@ -101,7 +101,7 @@ passed back to Emacs.")
 Processes spawned by other processes will inherit their GL, but
 \"brand new\" ones will use this.")
 
-(defvar erl-popup-on-output t
+(defvar erl-popup-on-output nil
   "Popup *erl-output* when new output arrives.")
 
 (defvar erl-stop-on-error nil

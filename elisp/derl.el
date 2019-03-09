@@ -28,7 +28,12 @@ mynode@cockatoo, FSM is the net-fsm process of the connection.")
 
 (defvar derl-cookie nil
   "*Cookie to use in distributed erlang connections, or NIL.
+When NIL, we use derl-node-to-cookie or read ~/.erlang.cookie.")
+
+(defvar derl-node-to-cookie nil
+  "*Function mapping node to cookie.
 When NIL, we read ~/.erlang.cookie.")
+
 
 ;; Local variables
 
@@ -211,11 +216,14 @@ complete and we become live."
   "Generate a message digest as required for the specification's
 gen_digest() function:
   (md5 (concat challenge-as-ascii-decimal cookie))"
+  (message (format "dbg: derl.el: %s" derl-connection-node))
   (derl-hexstring-to-binstring
    (md5 (concat (derl-cookie) (derl-int32-to-decimal challenge)))))
 
 (defun derl-cookie ()
   (or derl-cookie
+      (and derl-node-to-cookie
+           (funcall derl-node-to-cookie derl-connection-node))
       (with-temp-buffer
         (insert-file-contents (concat (getenv "HOME") "/.erlang.cookie"))
         (while (search-forward "\n" nil t)
