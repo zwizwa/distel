@@ -297,11 +297,11 @@
 
 (defun erlext-write-float (n)
   (cond
-   ((fboundp 'frexp)
-    ;; Function `frexp' was introduced in emacs 24.1;
-    ;; Erlang R11B-4 and later is able to decode this representation.
-    (erlext-write1 (erlext-get-code 'newFloat))
-    (mapc #'erlext-write1 (erlext-encode-ieee-double n)))
+;   ((fboundp 'frexp)
+;    ;; Function `frexp' was introduced in emacs 24.1;
+;    ;; Erlang R11B-4 and later is able to decode this representation.
+;    (erlext-write1 (erlext-get-code 'newFloat))
+;    (mapc #'erlext-write1 (erlext-encode-ieee-double n)))
    (t
     (erlext-write1 (erlext-get-code 'float))
     (let ((f (format "%.20e" n)))
